@@ -41,17 +41,29 @@
                 </v-btn>
             </v-scroll-x-reverse-transition>
             <v-scroll-x-reverse-transition>
-                <v-btn v-if="(openMenu=='add') && savingNewValidation" icon>
+                <v-btn
+                    v-if="(openMenu=='add') && savingNewValidation"
+                    icon
+                    @click="postSave"
+                >
                     <v-icon>mdi-check</v-icon>
                 </v-btn>
             </v-scroll-x-reverse-transition>
             <v-scroll-x-reverse-transition>
-                <v-btn v-if="openMenu=='detail'" icon :to="`/edit/${$route.params.id}`">
+                <v-btn
+                    v-if="openMenu=='detail'"
+                    icon
+                    :to="`/edit/${$route.params.id}`"
+                >
                     <v-icon>mdi-pencil</v-icon>
                 </v-btn>
             </v-scroll-x-reverse-transition>
             <v-scroll-x-reverse-transition>
-                <v-btn v-if="(openMenu=='edit') && savingValidation" icon>
+                <v-btn
+                    v-if="(openMenu=='edit') && savingValidation"
+                    icon
+                    @click="postUpdate"
+                >
                     <v-icon>mdi-check</v-icon>
                 </v-btn>
             </v-scroll-x-reverse-transition>
@@ -173,17 +185,17 @@
                     <v-icon>mdi-format-list-text</v-icon>
                 </v-btn>
 
-                <v-btn v-if="showMenu[1]">
+                <v-btn v-if="showMenu[1]" :to="`/add`">
                     <span>Data Baru</span>
                     <v-icon>mdi-account-plus</v-icon>
                 </v-btn>
 
-                <v-btn v-if="showMenu[2]">
+                <v-btn v-if="showMenu[2]" :to="`/view/${$route.params.id}`">
                     <span>Detail</span>
                     <v-icon>mdi-account-details</v-icon>
                 </v-btn>
 
-                <v-btn v-if="showMenu[3]">
+                <v-btn v-if="showMenu[3]" :to="`/edit/${$route.params.id}`">
                     <span>Edit</span>
                     <v-icon>mdi-account-edit</v-icon>
                 </v-btn>
@@ -228,7 +240,7 @@
                                 </v-list-item-action>
 
                                 <v-list-item-action>
-                                    <v-btn icon @click="deleteDataSensus(item)">
+                                    <v-btn icon @click="postDelete(item)">
                                         <v-icon color="pink">mdi-delete</v-icon>
                                     </v-btn>
                                 </v-list-item-action>
@@ -274,6 +286,19 @@
 
                 this.data_sensus = tmp;
             },
+            postDelete(item) {
+                const ck = confirm('Anda yakin akan menghapus data ini ?');
+                if (ck) {
+                    axios.post('/data-sensus/delete', {id: item.id})
+                        .then(response => {
+                            console.log(response);
+                            this.deleteDataSensus(item);
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+                }
+            }
         }
     };
 
@@ -464,16 +489,6 @@
                         this.data_edit = null;
                     });
             },
-            postUpdate() {
-                axios.post('/data-sensus/edit', this.data_edit)
-                    .then(response => {
-                        console.log(response);
-                        this.$root.routeTo(this.data_edit.id);
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    });
-            },
             searchVillage() {
                 let search = this.$refs.village_value.$refs.input.value;
                 console.log(search);
@@ -604,6 +619,9 @@
             data_baru() {
                 return this.$root.data_baru;
             }
+        },
+        mounted() {
+            this.$root.setAddAttr();
         },
         methods: {
             searchVillage() {
@@ -809,9 +827,6 @@
                 }
                 return false
             },
-            chooseMenu(title) {
-                this.appBarTitle = title
-            },
             routeTo(to) {
                 if (this.$router.history.current.path !== to) {
                     this.$router.push(to)
@@ -876,13 +891,15 @@
                 this.data_detail = item;
                 this.routeTo(`/view/${item.id}`);
             },
-            showAdd() {
+            setAddAttr() {
                 this.openMenu = 'add';
                 this.appBarTitle = 'Data Baru';
                 this.enableBackBtn = true;
                 this.showMenu = [0, 1, 0, 0, 1];
                 this.activeMenu = 0;
                 this.clickBack = () => this.showIndex();
+            },
+            showAdd() {
                 this.routeTo('/add');
             },
             showEbook() {
@@ -928,7 +945,7 @@
                     text: 'Simpan',
                     color: 'primary',
                     click: () => {
-                        if(data) {
+                        if (data) {
                             this.addAnggota(data);
                         }
                         this.showDialogAnggota = false;
@@ -954,7 +971,7 @@
                     text: 'Perbarui',
                     color: 'primary',
                     click: () => {
-                        if(data) {
+                        if (data) {
                             this.editAnggota(data, index);
                         }
                         this.showDialogAnggota = false;
@@ -980,32 +997,22 @@
             postSave() {
                 axios.post('/data-sensus/add', this.data_baru)
                     .then(response => {
-                        console.log(response);
+                        console.log(response.data.value.id);
+                        this.$root.routeTo(`/view/${response.data.value.id}`);
                     })
                     .catch(error => {
                         console.log(error);
                     });
             },
-            postDelete(id) {
-                const ck = confirm('Anda yakin akan menghapus data ini ?');
-                if (ck) {
-                    axios.post('/data-sensus/delete', {id: id})
-                        .then(response => {
-                            let length = vms.data_sensus.length;
-                            let tmp = [];
-                            for (let i = 0; i < length; i++) {
-                                if (vms.data_sensus[i].id !== id) {
-                                    tmp.push(vms.data_sensus[i])
-                                }
-                            }
-
-                            vms.data_sensus = tmp;
-                            console.log(response);
-                        })
-                        .catch(error => {
-                            console.log(error);
-                        });
-                }
+            postUpdate() {
+                axios.post('/data-sensus/edit', this.data_edit)
+                    .then(response => {
+                        console.log(response);
+                        this.$root.routeTo(`/view/${this.data_edit.id}`);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
             }
         }
     })
