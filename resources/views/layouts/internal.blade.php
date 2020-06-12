@@ -46,7 +46,7 @@
                 </v-btn>
             </v-scroll-x-reverse-transition>
             <v-scroll-x-reverse-transition>
-                <v-btn v-if="openMenu=='detail'" icon @click="showEdit(data_detail)">
+                <v-btn v-if="openMenu=='detail'" icon :to="`/edit/${$route.params.id}`">
                     <v-icon>mdi-pencil</v-icon>
                 </v-btn>
             </v-scroll-x-reverse-transition>
@@ -264,6 +264,7 @@
             },
             deleteDataSensus(item) {
                 let length = this.data_sensus.length;
+                // TODO push server
                 let tmp = [];
                 for (let i = 0; i < length; i++) {
                     if (this.data_sensus[i].id !== item.id) {
@@ -490,7 +491,7 @@
                             this.data_village = null;
                         });
                 } else {
-                    vms.data_village = null;
+                    this.data_village = null;
                 }
             },
             showAddAnggota(data_edit) {
@@ -592,6 +593,49 @@
                             </v-list-item>
                         </v-list>
                     </v-container>`,
+        data() {
+            return {
+                loading_village: false,
+                selectVillage: '',
+                data_village: null
+            }
+        },
+        computed: {
+            data_baru() {
+                return this.$root.data_baru;
+            }
+        },
+        methods: {
+            searchVillage() {
+                let search = this.$refs.village_value.$refs.input.value;
+                console.log(search);
+                if (search.length > 4) {
+                    this.loading_village = true;
+                    axios.post('/api/desa/q', {q: search})
+                        .then(response => {
+                            this.data_village = response.data.value.map(data => {
+                                return {text: data.label, value: data};
+                            });
+                            this.loading_village = false;
+                        })
+                        .catch(error => {
+                            this.loading_village = false;
+                            this.data_village = null;
+                        });
+                } else {
+                    this.data_village = null;
+                }
+            },
+            showAddAnggota(data_edit) {
+                this.$root.showAddAnggota(data_edit);
+            },
+            showEditAnggota(data_edit, index) {
+                this.$root.showEditAnggota(data_edit, index);
+            },
+            deleteAnggota(data_edit, index) {
+                this.$root.deleteAnggota(data_edit, index);
+            }
+        }
     };
     const Ebook = {
         template: `<v-container fluid style="padding: 0px;margin-top: 60px;margin-bottom: 60px">
@@ -884,7 +928,9 @@
                     text: 'Simpan',
                     color: 'primary',
                     click: () => {
-                        this.addAnggota(data);
+                        if(data) {
+                            this.addAnggota(data);
+                        }
                         this.showDialogAnggota = false;
                     }
                 };
@@ -908,7 +954,9 @@
                     text: 'Perbarui',
                     color: 'primary',
                     click: () => {
-                        this.editAnggota(data, index);
+                        if(data) {
+                            this.editAnggota(data, index);
+                        }
                         this.showDialogAnggota = false;
                     }
                 };
