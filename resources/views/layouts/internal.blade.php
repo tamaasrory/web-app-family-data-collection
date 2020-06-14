@@ -320,13 +320,13 @@
                             <v-list-item>
                                 <v-list-item-content>
                                     <v-list-item-title>Desa</v-list-item-title>
-                                    <v-list-item-subtitle v-text="data_detail.alamat.label"></v-list-item-subtitle>
+                                    <v-list-item-subtitle v-text="data_detail.alamat.detail.label"></v-list-item-subtitle>
                                 </v-list-item-content>
                             </v-list-item>
                             <v-list-item>
                                 <v-list-item-content>
                                     <v-list-item-title>Alamat</v-list-item-title>
-                                    <v-list-item-subtitle v-text="data_detail.alamat.detail"></v-list-item-subtitle>
+                                    <v-list-item-subtitle v-text="data_detail.alamat.lengkap"></v-list-item-subtitle>
                                 </v-list-item-content>
                             </v-list-item>
                             <v-subheader>Daftar Anggota Keluarga</v-subheader>
@@ -400,7 +400,7 @@
                             <v-list-item>
                                 <v-list-item-content>
                                     <v-autocomplete
-                                        v-model="data_edit.alamat.desa"
+                                        v-model="selectVillage"
                                         :loading="loading_village"
                                         :items="data_village"
                                         ref="village_value"
@@ -416,7 +416,7 @@
                             <v-list-item>
                                 <v-list-item-content>
                                     <v-textarea
-                                        v-model="data_edit.alamat.detail"
+                                        v-model="data_edit.alamat.lengkap"
                                         label="Alamat"
                                         rows="1"
                                         auto-grow
@@ -475,12 +475,30 @@
             console.log('Edit Data');
             this.loadingDetail();
         },
+        watch: {
+            selectVillage: function (newData, oldData) {
+                console.log(newData);
+                if (typeof newData.text == "undefined") {
+                    const {desa, kec, kab, prov} = newData;
+                    this.$root.data_baru.alamat.detail = {
+                        text: `Desa ${desa}, Kec. ${kec}, ${kab}, ${prov}`,
+                        value: newData
+                    };
+                    console.log(this.$root.data_baru.alamat.detail);
+                } else {
+                    this.data_edit.alamat.detail = newData;
+                }
+            }
+        },
         methods: {
             loadingDetail() {
                 axios.get(`/data-sensus/view/${this.$route.params.id}`)
                     .then(response => {
                         let temp = JSON.stringify(response.data.value);
                         this.data_edit = JSON.parse(temp);
+                        const detail = this.data_edit.alamat.detail;
+                        this.selectVillage = detail;
+                        this.data_village = [detail];
                         this.$root.data_edit = this.data_edit;
                         this.$root.setEditAttr(temp, this.data_edit);
                     })
@@ -496,9 +514,7 @@
                     this.loading_village = true;
                     axios.post('/api/desa/q', {q: search})
                         .then(response => {
-                            this.data_village = response.data.value.map(data => {
-                                return {text: data.label, value: data};
-                            });
+                            this.data_village = response.data.value;
                             this.loading_village = false;
                         })
                         .catch(error => {
@@ -545,7 +561,7 @@
                             <v-list-item>
                                 <v-list-item-content>
                                     <v-autocomplete
-                                        v-model="data_baru.alamat.desa"
+                                        v-model="selectVillage"
                                         :loading="loading_village"
                                         :items="data_village"
                                         ref="village_value"
@@ -561,7 +577,7 @@
                             <v-list-item>
                                 <v-list-item-content>
                                     <v-textarea
-                                        v-model="data_baru.alamat.detail"
+                                        v-model="data_baru.alamat.lengkap"
                                         label="Alamat"
                                         rows="1"
                                         auto-grow
@@ -620,6 +636,16 @@
                 return this.$root.data_baru;
             }
         },
+        watch: {
+            selectVillage: function (newData, oldData) {
+                const {desa, kec, kab, prov} = newData;
+                this.$root.data_baru.alamat.detail = {
+                    text: `Desa ${desa}, Kec. ${kec}, ${kab}, ${prov}`,
+                    value: newData
+                };
+                console.log(this.$root.data_baru.alamat.detail);
+            }
+        },
         mounted() {
             this.$root.setAddAttr();
         },
@@ -631,9 +657,7 @@
                     this.loading_village = true;
                     axios.post('/api/desa/q', {q: search})
                         .then(response => {
-                            this.data_village = response.data.value.map(data => {
-                                return {text: data.label, value: data};
-                            });
+                            this.data_village = response.data.value;
                             this.loading_village = false;
                         })
                         .catch(error => {
@@ -773,8 +797,8 @@
                 kode_akses: '',
                 no_hp: '',
                 alamat: {
-                    desa: '',
-                    detail: '',
+                    detail: null,
+                    lengkap: ''
                 },
                 anggota_keluarga: []
             },
@@ -808,7 +832,7 @@
         methods: {
             validation(data) {
                 if (data) {
-                    if (data.kode_akses == null || data.alamat.desa == null || data.alamat.detail == null) {
+                    if (data.kode_akses == null || data.alamat.detail == null || data.alamat.lengkap == null) {
                         return false
                     }
 
@@ -847,7 +871,7 @@
                 this.showMenu = [0, 0, 0, 1, 1];
                 this.activeMenu = 0;
                 this.clickBack = () => {
-                    console.log(item, ' === ', temp);
+                    console.log(JSON.stringify(item), ' === ', temp);
                     if (JSON.stringify(item) === temp) {
                         this.routeTo(`/view/${item.id}`);
                     } else {
