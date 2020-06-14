@@ -46,6 +46,7 @@ class DataSensusController extends Controller
 
             $result = DataSensus::create($request->all([
                 'kode_akses',
+                'nama_kk',
                 'no_hp',
                 'alamat',
                 'anggota_keluarga',
@@ -96,6 +97,7 @@ class DataSensusController extends Controller
             if ($dataSensus) {
                 $result = $dataSensus->update($request->all([
                     'kode_akses',
+                    'nama_kk',
                     'no_hp',
                     'alamat',
                     'anggota_keluarga',
