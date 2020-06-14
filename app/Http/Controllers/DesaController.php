@@ -61,6 +61,7 @@ class DesaController extends Controller
                         $result2[$tmp[$key]] = ucwords(strtolower(trim($td->nodeValue)));
                     }
                     $result2['label'] = "Desa {$result2['desa']}, Kec. {$result2['kec']}, {$result2['kab']}, {$result2['prov']}";
+                    $result2['uniq'] = $result2['id_prov'] . $result2['id_kab'] . $result2['id_kec'] . $result2['id_des'];
                     $result[] = $result2;
                 }
 
