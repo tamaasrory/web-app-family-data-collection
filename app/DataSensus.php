@@ -10,6 +10,7 @@ namespace App;
  * @property string $kode_akses
  * @property array $anggota_keluarga
  * @property array $alamat
+ * @property string $nama_kk
  * @property string $no_hp
  * @property string $created_at
  * @property string $updated_at
@@ -22,6 +23,7 @@ class DataSensus extends Model
         'kode_akses',
         'anggota_keluarga',
         'alamat',
+        'nama_kk',
         'no_hp',
         'created_at',
         'updated_at',
