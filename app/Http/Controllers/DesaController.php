@@ -60,9 +60,11 @@ class DesaController extends Controller
                     foreach ($xpath->query("td", $tr) as $key => $td) {
                         $result2[$tmp[$key]] = ucwords(strtolower(trim($td->nodeValue)));
                     }
-                    $result2['label'] = "Desa {$result2['desa']}, Kec. {$result2['kec']}, {$result2['kab']}, {$result2['prov']}";
                     $result2['uniq'] = $result2['id_prov'] . $result2['id_kab'] . $result2['id_kec'] . $result2['id_des'];
-                    $result[] = $result2;
+                    $result[] = [
+                        'text' => "Desa {$result2['desa']}, Kec. {$result2['kec']}, {$result2['kab']}, {$result2['prov']}",
+                        'value' => $result2
+                    ];
                 }
 
                 if (count($result)) {
