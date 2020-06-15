@@ -313,6 +313,12 @@
                             </v-list-item>
                             <v-list-item>
                                 <v-list-item-content>
+                                    <v-list-item-title>Nama Kepala Keluarga</v-list-item-title>
+                                    <v-list-item-subtitle v-text="data_detail.nama_kk"></v-list-item-subtitle>
+                                </v-list-item-content>
+                            </v-list-item>
+                            <v-list-item>
+                                <v-list-item-content>
                                     <v-list-item-title>Nomor Ponsel</v-list-item-title>
                                     <v-list-item-subtitle v-text="data_detail.no_hp"></v-list-item-subtitle>
                                 </v-list-item-content>
@@ -320,7 +326,7 @@
                             <v-list-item>
                                 <v-list-item-content>
                                     <v-list-item-title>Desa</v-list-item-title>
-                                    <v-list-item-subtitle v-text="data_detail.alamat.detail.label"></v-list-item-subtitle>
+                                    <v-list-item-subtitle v-text="data_detail.alamat.detail.text"></v-list-item-subtitle>
                                 </v-list-item-content>
                             </v-list-item>
                             <v-list-item>
@@ -384,6 +390,15 @@
                                         v-model="data_edit.kode_akses"
                                         label="Kode Akses"
                                         disabled
+                                        hide-details>
+                                    </v-text-field>
+                                </v-list-item-content>
+                            </v-list-item>
+                            <v-list-item>
+                                <v-list-item-content>
+                                    <v-text-field
+                                        v-model="data_edit.nama_kk"
+                                        label="Nama Kepala Keluarga"
                                         hide-details>
                                     </v-text-field>
                                 </v-list-item-content>
@@ -477,14 +492,15 @@
         },
         watch: {
             selectVillage: function (newData, oldData) {
-                console.log(newData);
-                if (typeof newData.text == "undefined") {
-                    const {desa, kec, kab, prov} = newData;
-                    this.$root.data_baru.alamat.detail = {
-                        text: `Desa ${desa}, Kec. ${kec}, ${kab}, ${prov}`,
-                        value: newData
-                    };
-                    console.log(this.$root.data_baru.alamat.detail);
+                if(newData) {
+                    if (newData.text === undefined) {
+                        const {desa, kec, kab, prov} = newData;
+                        this.$root.data_baru.alamat.detail = {
+                            text: `Desa ${desa}, Kec. ${kec}, ${kab}, ${prov}`,
+                            value: newData
+                        };
+                        console.log(this.$root.data_baru.alamat.detail);
+                    }
                 } else {
                     this.data_edit.alamat.detail = newData;
                 }
@@ -549,6 +565,16 @@
                                     </v-text-field>
                                 </v-list-item-content>
                             </v-list-item>
+                            <v-list-item>
+                                <v-list-item-content>
+                                    <v-text-field
+                                        v-model="data_baru.nama_kk"
+                                        label="Nama Kepala Keluarga"
+                                        hide-details>
+                                    </v-text-field>
+                                </v-list-item-content>
+                            </v-list-item>
+
                             <v-list-item>
                                 <v-list-item-content>
                                     <v-text-field
@@ -795,6 +821,7 @@
             data_edit: null,
             data_baru: {
                 kode_akses: '',
+                nama_kk: '',
                 no_hp: '',
                 alamat: {
                     detail: null,
